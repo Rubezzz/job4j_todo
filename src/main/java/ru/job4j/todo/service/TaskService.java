@@ -22,4 +22,6 @@ public interface TaskService {
     Collection<Task> findNew();
 
     Collection<Task> findCompleted();
+
+    Collection<Task> findOutdated();
 }

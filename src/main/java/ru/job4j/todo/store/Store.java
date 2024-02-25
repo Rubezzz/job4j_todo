@@ -21,4 +21,6 @@ public interface Store {
     Collection<Task> findNew();
 
     Collection<Task> findCompleted();
+
+    Collection<Task> findOutdated();
 }

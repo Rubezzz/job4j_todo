@@ -53,4 +53,9 @@ public class SimpleTaskService implements TaskService {
     public Collection<Task> findCompleted() {
         return taskStore.findCompleted();
     }
+
+    @Override
+    public Collection<Task> findOutdated() {
+        return taskStore.findOutdated();
+    }
 }

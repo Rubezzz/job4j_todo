@@ -44,66 +44,62 @@ public class TaskStore implements Store {
     @Override
     public boolean complete(int id) {
         Session session = sf.openSession();
-        boolean rsl = false;
+        int rsl = 0;
         try {
             session.beginTransaction();
-            session.createQuery("UPDATE Task SET done = :fDone  WHERE id = :fId")
+            rsl = session.createQuery("UPDATE Task SET done = :fDone  WHERE id = :fId")
                     .setParameter("fDone", true)
                     .setParameter("fId", id)
                     .executeUpdate();
             session.getTransaction().commit();
-            rsl = true;
         } catch (Exception e) {
             session.getTransaction().rollback();
             logger.error(e.getMessage(), e);
         } finally {
             session.close();
         }
-        return rsl;
+        return rsl != 0;
     }
 
     @Override
     public boolean deleteById(int id) {
         Session session = sf.openSession();
-        boolean rsl = false;
+        int rsl = 0;
         try {
             session.beginTransaction();
-            session.createQuery("DELETE Task WHERE id = :fId")
+            rsl = session.createQuery("DELETE Task WHERE id = :fId")
                     .setParameter("fId", id)
                     .executeUpdate();
             session.getTransaction().commit();
-            rsl = true;
         } catch (Exception e) {
             session.getTransaction().rollback();
             logger.error(e.getMessage(), e);
         } finally {
             session.close();
         }
-        return rsl;
+        return rsl != 0;
     }
 
     @Override
     public boolean update(Task task) {
         Session session = sf.openSession();
-        boolean rsl = false;
+        int rsl = 0;
         try {
             session.beginTransaction();
-            session.createQuery("UPDATE Task SET name = :fName, description = :fDescription, created = :fCreated, done = :fDone  WHERE id = :fId")
+            rsl = session.createQuery("UPDATE Task SET name = :fName, description = :fDescription, done = :fDone  WHERE id = :fId")
                     .setParameter("fName", task.getName())
                     .setParameter("fDescription", task.getDescription())
-                    .setParameter("fCreated", task.getCreated())
                     .setParameter("fDone", task.isDone())
                     .setParameter("fId", task.getId())
                     .executeUpdate();
             session.getTransaction().commit();
-            rsl = true;
         } catch (Exception e) {
             session.getTransaction().rollback();
             logger.error(e.getMessage(), e);
         } finally {
             session.close();
         }
-        return rsl;
+        return rsl != 0;
     }
 
     @Override
@@ -149,9 +145,8 @@ public class TaskStore implements Store {
         List<Task> rsl = new ArrayList<>();
         try {
             session.beginTransaction();
-            Query<Task> query = session.createQuery("FROM Task WHERE created BETWEEN :startDate AND :endDate", Task.class)
-                    .setParameter("startDate", LocalDateTime.now().minusDays(1))
-                    .setParameter("endDate", LocalDateTime.now());
+            Query<Task> query = session.createQuery("FROM Task WHERE created > :fDate", Task.class)
+                    .setParameter("fDate", LocalDateTime.now().minusDays(1));
             rsl = query.getResultList();
             session.getTransaction().commit();
         } catch (Exception e) {
@@ -171,6 +166,26 @@ public class TaskStore implements Store {
             session.beginTransaction();
             Query<Task> query = session.createQuery("FROM Task WHERE done = :fDone", Task.class)
                     .setParameter("fDone", true);
+            rsl = query.getResultList();
+            session.getTransaction().commit();
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            session.getTransaction().rollback();
+        } finally {
+            session.close();
+        }
+        return rsl;
+    }
+
+    @Override
+    public Collection<Task> findOutdated() {
+        Session session = sf.openSession();
+        List<Task> rsl = new ArrayList<>();
+        try {
+            session.beginTransaction();
+            Query<Task> query = session.createQuery("FROM Task WHERE done <> :fDone AND created < :fDate", Task.class)
+                    .setParameter("fDone", true)
+                    .setParameter("fDate", LocalDateTime.now().minusDays(7));
             rsl = query.getResultList();
             session.getTransaction().commit();
         } catch (Exception e) {
