@@ -28,6 +28,7 @@
                     <th scope="col">#</th>
                     <th scope="col">Имя</th>
                     <th scope="col">Дата создания</th>
+                    <th scope="col">Автор</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -43,6 +44,7 @@
                     <td th:text="${task.id}" />
                     <td><a th:text="${task.name}" th:href="@{/tasks/{taskId}(taskId=${task.id})}"></a></td>
                     <td th:text="${task.created}"/>
+                    <td th:text="${task.author.name}"/>
                 </tr>
                 </tbody>
             </table>
