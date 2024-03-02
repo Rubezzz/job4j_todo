@@ -27,6 +27,8 @@
                 <dd th:if="${!task.done}" class="text-danger">Не выполнено</dd>
                 <dt>Приоритет</dt>
                 <dd th:text="${task.priority.name}" />
+                <dt>Категория</dt>
+                <dd th:each="category : ${task.categories}" th:text="${category.name}"></dd>
                 <dt>Автор</dt>
                 <dd th:text="${task.author.name}" />
             </dl>
