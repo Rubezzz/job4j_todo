@@ -10,13 +10,11 @@ import ru.job4j.todo.model.User;
 import ru.job4j.todo.service.CategoryService;
 import ru.job4j.todo.service.PriorityService;
 import ru.job4j.todo.service.TaskService;
+import ru.job4j.todo.util.DateMapper;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
-import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.TimeZone;
 
 @Controller
 @AllArgsConstructor
@@ -27,40 +25,27 @@ public class TaskController {
     private final PriorityService priorityService;
     private final CategoryService categoryService;
 
-    private Collection<Task> refactorDate(Collection<Task> tasks, HttpServletRequest request) {
-        var user = (User) request.getSession().getAttribute("user");
-        var zone = "".equals(user.getTimezone()) || user.getTimezone() == null
-                ? TimeZone.getDefault().getID() : user.getTimezone();
-        for (Task task : tasks) {
-            task.setCreated(task.getCreated()
-                    .atZone(ZoneId.of("UTC"))
-                    .withZoneSameInstant(ZoneId.of(zone))
-                    .toLocalDateTime());
-        }
-        return tasks;
-    }
-
     @GetMapping
     public String getAll(Model model, HttpServletRequest request) {
-        model.addAttribute("tasks", refactorDate(taskService.findAll(), request));
+        model.addAttribute("tasks", DateMapper.mapWithTimezone(taskService.findAll(), request));
         return "tasks/list";
     }
 
     @GetMapping("/completed")
     public String getCompleted(Model model, HttpServletRequest request) {
-        model.addAttribute("tasks", refactorDate(taskService.findCompleted(), request));
+        model.addAttribute("tasks", DateMapper.mapWithTimezone(taskService.findCompleted(), request));
         return "tasks/list";
     }
 
     @GetMapping("/new")
     public String getNew(Model model, HttpServletRequest request) {
-        model.addAttribute("tasks", refactorDate(taskService.findNew(), request));
+        model.addAttribute("tasks", DateMapper.mapWithTimezone(taskService.findNew(), request));
         return "tasks/list";
     }
 
     @GetMapping("/outdated")
     public String getOutdated(Model model, HttpServletRequest request) {
-        model.addAttribute("tasks", refactorDate(taskService.findOutdated(), request));
+        model.addAttribute("tasks", DateMapper.mapWithTimezone(taskService.findOutdated(), request));
         return "tasks/list";
     }
 
